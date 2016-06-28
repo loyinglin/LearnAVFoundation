@@ -54,9 +54,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 
-/*
- Player view backed by an AVPlayerLayer
- */
+
 @interface APLPlayerView : UIView
 
 @property (nonatomic, retain) AVPlayer *player;
@@ -86,6 +84,7 @@
 
 static NSString* const AVCDVPlayerViewControllerStatusObservationContext	= @"AVCDVPlayerViewControllerStatusObservationContext";
 static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDVPlayerViewControllerRateObservationContext";
+static void testContext(){};
 
 @interface APLViewController ()
 {
@@ -103,6 +102,7 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 @property APLSimpleEditor		*editor;
 @property NSMutableArray		*clips;
 @property NSMutableArray		*clipTimeRanges;
+@property (nonatomic , strong) NSMutableArray *arrVaild;
 
 @property AVPlayer				*player;
 @property AVPlayerItem			*playerItem;
@@ -140,14 +140,12 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 	self.clips = [[NSMutableArray alloc] initWithCapacity:2];
 	self.clipTimeRanges = [[NSMutableArray alloc] initWithCapacity:2];
 	
-	// Defaults for the transition settings.
-	_transitionDuration = 2.0;
+    _transitionDuration = 2.0; // 默认变换时间
 	_transitionsEnabled = YES;
 	
 	[self updateScrubber];
 	[self updateTimeLabel];
 	
-	// Add the clips from the main bundle to create a composition using them
 	[self setupEditingAndPlayback];
 }
 
@@ -164,11 +162,10 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 	
 	[self addTimeObserverToPlayer];
 	
-	// Build AVComposition and AVVideoComposition objects for playback
+
 	[self.editor buildCompositionObjectsForPlayback];
 	[self synchronizePlayerWithEditor];
 	
-	// Set our AVPlayer and all composition objects on the AVCompositionDebugView
 	self.compositionDebugView.player = self.player;
 	[self.compositionDebugView synchronizeToComposition:self.editor.composition videoComposition:self.editor.videoComposition audioMix:self.editor.audioMix];
 	[self.compositionDebugView setNeedsDisplay];
@@ -186,16 +183,21 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 
 - (void)setupEditingAndPlayback
 {
-	AVURLAsset *asset1 = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"sample_clip1" ofType:@"m4v"]]];
-	AVURLAsset *asset2 = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"qwe" ofType:@"mp4"]]];
+    AVURLAsset *asset3 = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"abc" ofType:@"mp4"]]];
+    AVURLAsset *asset2 = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"qwe" ofType:@"mp4"]]];
+    AVURLAsset *asset1 = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"eer" ofType:@"mp4"]]];
+    
 	
 	dispatch_group_t dispatchGroup = dispatch_group_create();
 	NSArray *assetKeysToLoadAndTest = @[@"tracks", @"duration", @"composable"];
 	
-	[self loadAsset:asset1 withKeys:assetKeysToLoadAndTest usingDispatchGroup:dispatchGroup];
-	[self loadAsset:asset2 withKeys:assetKeysToLoadAndTest usingDispatchGroup:dispatchGroup];
+    // 加载视频
+    [self loadAsset:asset1 withKeys:assetKeysToLoadAndTest usingDispatchGroup:dispatchGroup];
+    [self loadAsset:asset2 withKeys:assetKeysToLoadAndTest usingDispatchGroup:dispatchGroup];
+    [self loadAsset:asset3 withKeys:assetKeysToLoadAndTest usingDispatchGroup:dispatchGroup];
+
 	
-	// Wait until both assets are loaded
+	// 等待就绪
 	dispatch_group_notify(dispatchGroup, dispatch_get_main_queue(), ^(){
 		[self synchronizeWithEditor];
 	});
@@ -205,28 +207,35 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 {
 	dispatch_group_enter(dispatchGroup);
 	[asset loadValuesAsynchronouslyForKeys:assetKeysToLoad completionHandler:^(){
-		// First test whether the values of each of the keys we need have been successfully loaded.
+		// 测试是否成功加载
+        BOOL bSuccess = YES;
 		for (NSString *key in assetKeysToLoad) {
 			NSError *error;
 			
 			if ([asset statusOfValueForKey:key error:&error] == AVKeyValueStatusFailed) {
 				NSLog(@"Key value loading failed for key:%@ with error: %@", key, error);
-				goto bail;
+                bSuccess = NO;
+                break;
 			}
 		}
 		if (![asset isComposable]) {
 			NSLog(@"Asset is not composable");
-			goto bail;
+            bSuccess = NO;
 		}
-		
-		[self.clips addObject:asset];
-		// This code assumes that both assets are atleast 5 seconds long.
-		[self.clipTimeRanges addObject:[NSValue valueWithCMTimeRange:CMTimeRangeMake(CMTimeMakeWithSeconds(0, 1), CMTimeMakeWithSeconds(5, 1))]];
-	bail:
-		dispatch_group_leave(dispatchGroup);
+        if (bSuccess && CMTimeGetSeconds(asset.duration) > 5) {
+            [self.clips addObject:asset];
+            [self.clipTimeRanges addObject:[NSValue valueWithCMTimeRange:CMTimeRangeMake(CMTimeMakeWithSeconds(0, 1), CMTimeMakeWithSeconds(5, 1))]];
+        }
+        else {
+            NSLog(@"error ");
+        }
+        dispatch_group_leave(dispatchGroup);
 	}];
 }
 
+/**
+ *  开始播放
+ */
 - (void)synchronizePlayerWithEditor
 {
 	if ( self.player == nil )
@@ -237,18 +246,16 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 	if (self.playerItem != playerItem) {
 		if ( self.playerItem ) {
 			[self.playerItem removeObserver:self forKeyPath:@"status"];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem]; // 移除监听
 		}
 		
 		self.playerItem = playerItem;
 		
 		if ( self.playerItem ) {
-			// Observe the player item "status" key to determine when it is ready to play
+			// 监听status属性，是否已经就绪
 			[self.playerItem addObserver:self forKeyPath:@"status" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial) context:(__bridge void *)(AVCDVPlayerViewControllerStatusObservationContext)];
 			
-			// When the player item has played to its end time we'll set a flag
-			// so that the next time the play method is issued the player will
-			// be reset to time zero first.
+			// 播放完成的监听
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidReachEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem];
 		}
 		[self.player replaceCurrentItemWithPlayerItem:playerItem];
@@ -273,7 +280,7 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 	[self.editor buildCompositionObjectsForPlayback];
 	[self synchronizePlayerWithEditor];
 	
-	// Set our AVPlayer and all composition objects on the AVCompositionDebugView
+	// 同步设置
 	self.compositionDebugView.player = self.player;
 	[self.compositionDebugView synchronizeToComposition:self.editor.composition videoComposition:self.editor.videoComposition audioMix:self.editor.audioMix];
 	[self.compositionDebugView setNeedsDisplay];
@@ -281,7 +288,7 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 
 - (void)synchronizeEditorClipsWithOurClips
 {
-	NSMutableArray *validClips = [NSMutableArray arrayWithCapacity:2];
+    NSMutableArray *validClips = [NSMutableArray array];
 	for (AVURLAsset *asset in self.clips) {
 		if (![asset isKindOfClass:[NSNull class]]) {
 			[validClips addObject:asset];
@@ -293,7 +300,7 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 
 - (void)synchronizeEditorClipTimeRangesWithOurClipTimeRanges
 {
-	NSMutableArray *validClipTimeRanges = [NSMutableArray arrayWithCapacity:2];
+	NSMutableArray *validClipTimeRanges = [NSMutableArray array];
 	for (NSValue *timeRange in self.clipTimeRanges) {
 		if (! [timeRange isKindOfClass:[NSNull class]]) {
 			[validClipTimeRanges addObject:timeRange];
@@ -305,7 +312,6 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 
 #pragma mark - Utilities
 
-/* Update the scrubber and time label periodically. */
 - (void)addTimeObserverToPlayer
 {
 	if (_timeObserver)
@@ -384,6 +390,9 @@ static NSString* const AVCDVPlayerViewControllerRateObservationContext = @"AVCDV
 	else {
 		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	}
+    if (context != testContext) {
+        NSLog(@"yes");
+    }
 }
 
 - (void)updatePlayPauseButton

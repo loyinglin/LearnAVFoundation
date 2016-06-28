@@ -64,8 +64,8 @@
 	NSInteger i;
 	NSUInteger clipsCount = [self.clips count];
 	
-	// Make transitionDuration no greater than half the shortest clip duration.
-	CMTime transitionDuration = self.transitionDuration;
+	// 确保最后合并后的视频，不会超过最小的长度。
+	CMTime transitionDuration = self.transitionDuration; 
 	for (i = 0; i < clipsCount; i++ ) {
 		NSValue *clipTimeRange = [self.clipTimeRanges objectAtIndex:i];
 		if (clipTimeRange) {
@@ -78,10 +78,10 @@
 	// Add two video tracks and two audio tracks.
 	AVMutableCompositionTrack *compositionVideoTracks[2];
 	AVMutableCompositionTrack *compositionAudioTracks[2];
-	compositionVideoTracks[0] = [composition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
-	compositionVideoTracks[1] = [composition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
-	compositionAudioTracks[0] = [composition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
-	compositionAudioTracks[1] = [composition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+	compositionVideoTracks[0] = [composition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid]; // 添加视频轨道0
+	compositionVideoTracks[1] = [composition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid]; // 添加视频轨道1
+	compositionAudioTracks[0] = [composition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid]; // 添加音频轨道0
+	compositionAudioTracks[1] = [composition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid]; // 添加音频轨道1
 	
 	CMTimeRange *passThroughTimeRanges = alloca(sizeof(CMTimeRange) * clipsCount);
 	CMTimeRange *transitionTimeRanges = alloca(sizeof(CMTimeRange) * clipsCount);
@@ -92,21 +92,25 @@
 		AVURLAsset *asset = [self.clips objectAtIndex:i];
 		NSValue *clipTimeRange = [self.clipTimeRanges objectAtIndex:i];
 		CMTimeRange timeRangeInAsset;
-		if (clipTimeRange)
+        if (clipTimeRange) {
 			timeRangeInAsset = [clipTimeRange CMTimeRangeValue];
-		else
+        }
+        else {
 			timeRangeInAsset = CMTimeRangeMake(kCMTimeZero, [asset duration]);
+        }
 		
 		AVAssetTrack *clipVideoTrack = [[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
-		[compositionVideoTracks[alternatingIndex] insertTimeRange:timeRangeInAsset ofTrack:clipVideoTrack atTime:nextClipStartTime error:nil];
+        NSError* error;
+		[compositionVideoTracks[alternatingIndex] insertTimeRange:timeRangeInAsset ofTrack:clipVideoTrack atTime:nextClipStartTime error:&error];
+
 		
 		AVAssetTrack *clipAudioTrack = [[asset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0];
-		[compositionAudioTracks[alternatingIndex] insertTimeRange:timeRangeInAsset ofTrack:clipAudioTrack atTime:nextClipStartTime error:nil];
-		
-		// Remember the time range in which this clip should pass through.
-		// Second clip begins with a transition.
-		// First clip ends with a transition.
-		// Exclude those transitions from the pass through time ranges.
+		[compositionAudioTracks[alternatingIndex] insertTimeRange:timeRangeInAsset ofTrack:clipAudioTrack atTime:nextClipStartTime error:&error];
+        
+        NSLog(@"add at %lf long %lf", CMTimeGetSeconds(timeRangeInAsset.start) + CMTimeGetSeconds(nextClipStartTime), CMTimeGetSeconds(timeRangeInAsset.duration));
+        
+		// 计算应该直接播放的区间
+        // 从播放区间里面去掉变换区间
 		passThroughTimeRanges[i] = CMTimeRangeMake(nextClipStartTime, timeRangeInAsset.duration);
 		if (i > 0) {
 			passThroughTimeRanges[i].start = CMTimeAdd(passThroughTimeRanges[i].start, transitionDuration);
@@ -115,56 +119,53 @@
 		if (i+1 < clipsCount) {
 			passThroughTimeRanges[i].duration = CMTimeSubtract(passThroughTimeRanges[i].duration, transitionDuration);
 		}
+        NSLog(@"passthrough at %lf long %lf", CMTimeGetSeconds(passThroughTimeRanges[i].start), CMTimeGetSeconds(passThroughTimeRanges[i].duration));
+		// 计算下一个插入点
+		nextClipStartTime = CMTimeAdd(nextClipStartTime, timeRangeInAsset.duration); // 加上持续时间
+		nextClipStartTime = CMTimeSubtract(nextClipStartTime, transitionDuration); // 减去变换时间，得到下一个插入点
 		
-		// The end of this clip will overlap the start of the next by transitionDuration.
-		// (Note: this arithmetic falls apart if timeRangeInAsset.duration < 2 * transitionDuration.)
-		nextClipStartTime = CMTimeAdd(nextClipStartTime, timeRangeInAsset.duration);
-		nextClipStartTime = CMTimeSubtract(nextClipStartTime, transitionDuration);
-		
-		// Remember the time range for the transition to the next item.
+		// 第i个视频的变换时间为下一个的插入点，长度为变换时间
 		if (i+1 < clipsCount) {
 			transitionTimeRanges[i] = CMTimeRangeMake(nextClipStartTime, transitionDuration);
-		}
+        }
+        NSLog(@"transitionTimeRanges at %lf long %lf", CMTimeGetSeconds(transitionTimeRanges[i].start), CMTimeGetSeconds(transitionTimeRanges[i].duration));
 	}
 	
-	// Set up the video composition if we are to perform crossfade transitions between clips.
-	NSMutableArray *instructions = [NSMutableArray array];
-	NSMutableArray *trackMixArray = [NSMutableArray array];
 	
-	// Cycle between "pass through A", "transition from A to B", "pass through B"
+	NSMutableArray *instructions = [NSMutableArray array]; // 视频操作指令集合
+	NSMutableArray<AVAudioMixInputParameters *> *trackMixArray = [NSMutableArray<AVAudioMixInputParameters *> array]; // 音频操作指令集合
+	
 	for (i = 0; i < clipsCount; i++ ) {
-		NSInteger alternatingIndex = i % 2; // alternating targets
+		NSInteger alternatingIndex = i % 2; // 轨道索引
 		
-		// Pass through clip i.
-		AVMutableVideoCompositionInstruction *passThroughInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-		passThroughInstruction.timeRange = passThroughTimeRanges[i];
-		AVMutableVideoCompositionLayerInstruction *passThroughLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTracks[alternatingIndex]];
+		AVMutableVideoCompositionInstruction *passThroughInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction]; // 新建指令
+		passThroughInstruction.timeRange = passThroughTimeRanges[i]; // 直接播放
+		AVMutableVideoCompositionLayerInstruction *passThroughLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTracks[alternatingIndex]]; // 视频轨道操作指令
 		
 		passThroughInstruction.layerInstructions = [NSArray arrayWithObject:passThroughLayer];
-		[instructions addObject:passThroughInstruction];
+		[instructions addObject:passThroughInstruction]; // 添加到指令集合
 		
-		if (i+1 < clipsCount) {
-			AVMutableVideoCompositionInstruction *transitionInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-			transitionInstruction.timeRange = transitionTimeRanges[i];
-			AVMutableVideoCompositionLayerInstruction *fromLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTracks[alternatingIndex]];
-			AVMutableVideoCompositionLayerInstruction *toLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTracks[1-alternatingIndex]];
-			// Fade in the toLayer by setting a ramp from 0.0 to 1.0.
+		if (i+1 < clipsCount) { // 不是最后一个
+			AVMutableVideoCompositionInstruction *transitionInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction]; // 新建指令
+			transitionInstruction.timeRange = transitionTimeRanges[i]; // 变换时间
+			AVMutableVideoCompositionLayerInstruction *fromLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTracks[alternatingIndex]]; // 视频轨道操作指令
+			AVMutableVideoCompositionLayerInstruction *toLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:compositionVideoTracks[1-alternatingIndex]]; // 新的轨道指令
+			// 目的轨道，从0到1
 			[toLayer setOpacityRampFromStartOpacity:0.0 toEndOpacity:1.0 timeRange:transitionTimeRanges[i]];
 			
 			transitionInstruction.layerInstructions = [NSArray arrayWithObjects:toLayer, fromLayer, nil];
 			[instructions addObject:transitionInstruction];
 			
-			// Add AudioMix to fade in the volume ramps
-			AVMutableAudioMixInputParameters *trackMix1 = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:compositionAudioTracks[0]];
+			AVMutableAudioMixInputParameters *trackMix1 = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:compositionAudioTracks[alternatingIndex]]; // 音轨0的参数
 			
-			[trackMix1 setVolumeRampFromStartVolume:1.0 toEndVolume:0.0 timeRange:transitionTimeRanges[0]];
+			[trackMix1 setVolumeRampFromStartVolume:1.0 toEndVolume:0.0 timeRange:transitionTimeRanges[i]]; // 音轨0，变换期间音量从1.0到0.0
 			
 			[trackMixArray addObject:trackMix1];
 			
-			AVMutableAudioMixInputParameters *trackMix2 = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:compositionAudioTracks[1]];
+			AVMutableAudioMixInputParameters *trackMix2 = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:compositionAudioTracks[1 - alternatingIndex]]; // 音轨1的参数
 			
-			[trackMix2 setVolumeRampFromStartVolume:0.0 toEndVolume:1.0 timeRange:transitionTimeRanges[0]];
-			[trackMix2 setVolumeRampFromStartVolume:1.0 toEndVolume:1.0 timeRange:passThroughTimeRanges[1]];
+			[trackMix2 setVolumeRampFromStartVolume:0.0 toEndVolume:1.0 timeRange:transitionTimeRanges[i]]; // 变换期间音量从0.0到1.0
+			[trackMix2 setVolumeRampFromStartVolume:1.0 toEndVolume:1.0 timeRange:passThroughTimeRanges[i + 1]]; // 播放期间音量 一直为1.0
 			
 			[trackMixArray addObject:trackMix2];
 		}
@@ -190,18 +191,13 @@
 	
 	composition.naturalSize = videoSize;
 	
-	// With transitions:
-	// Place clips into alternating video & audio tracks in composition, overlapped by transitionDuration.
-	// Set up the video composition to cycle between "pass through A", "transition from A to B",
-	// "pass through B"
-	
 	videoComposition = [AVMutableVideoComposition videoComposition];
 	audioMix = [AVMutableAudioMix audioMix];
 	
 	[self buildTransitionComposition:composition andVideoComposition:videoComposition andAudioMix:audioMix];
 	
 	if (videoComposition) {
-		// Every videoComposition needs these properties to be set:
+		// 通用属性
 		videoComposition.frameDuration = CMTimeMake(1, 30); // 30 fps
 		videoComposition.renderSize = videoSize;
 	}

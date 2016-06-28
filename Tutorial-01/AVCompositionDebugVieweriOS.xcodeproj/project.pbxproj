@@ -26,9 +26,9 @@
 		EFFCDBEB175FC8CE00C81A29 /* APLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EFFCDBEA175FC8CE00C81A29 /* APLViewController.m */; };
 		EFFCDBF3175FCDE500C81A29 /* APLSimpleEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = EFFCDBF2175FCDE500C81A29 /* APLSimpleEditor.m */; };
 		EFFCDC10175FCEB200C81A29 /* APLCompositionDebugView.m in Sources */ = {isa = PBXBuildFile; fileRef = EFFCDC0F175FCEB200C81A29 /* APLCompositionDebugView.m */; };
-		EFFCDC12175FD40800C81A29 /* sample_clip1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = EFFCDC11175FD40800C81A29 /* sample_clip1.m4v */; };
-		EFFCDC14175FD42C00C81A29 /* sample_clip2.mov in Resources */ = {isa = PBXBuildFile; fileRef = EFFCDC13175FD42C00C81A29 /* sample_clip2.mov */; };
 		FD65AC191D1BCE0A00C5C1A4 /* qwe.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FD65AC181D1BCE0A00C5C1A4 /* qwe.mp4 */; };
+		FD65AC4E1D215B8600C5C1A4 /* abc.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FD65AC4D1D215B8600C5C1A4 /* abc.mp4 */; };
+		FD65AC511D22453200C5C1A4 /* eer.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FD65AC501D22453200C5C1A4 /* eer.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,9 +58,9 @@
 		EFFCDBF2175FCDE500C81A29 /* APLSimpleEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = APLSimpleEditor.m; sourceTree = "<group>"; };
 		EFFCDC0E175FCEB200C81A29 /* APLCompositionDebugView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APLCompositionDebugView.h; sourceTree = "<group>"; };
 		EFFCDC0F175FCEB200C81A29 /* APLCompositionDebugView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = APLCompositionDebugView.m; sourceTree = "<group>"; };
-		EFFCDC11175FD40800C81A29 /* sample_clip1.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample_clip1.m4v; sourceTree = "<group>"; };
-		EFFCDC13175FD42C00C81A29 /* sample_clip2.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = sample_clip2.mov; sourceTree = "<group>"; };
 		FD65AC181D1BCE0A00C5C1A4 /* qwe.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = qwe.mp4; sourceTree = "<group>"; };
+		FD65AC4D1D215B8600C5C1A4 /* abc.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.mp4; sourceTree = "<group>"; };
+		FD65AC501D22453200C5C1A4 /* eer.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = eer.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,9 +127,9 @@
 		EFFCDBCA175FC8CE00C81A29 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				FD65AC501D22453200C5C1A4 /* eer.mp4 */,
+				FD65AC4D1D215B8600C5C1A4 /* abc.mp4 */,
 				FD65AC181D1BCE0A00C5C1A4 /* qwe.mp4 */,
-				EFFCDC11175FD40800C81A29 /* sample_clip1.m4v */,
-				EFFCDC13175FD42C00C81A29 /* sample_clip2.mov */,
 				EFFCDBCB175FC8CE00C81A29 /* AVCompositionDebugVieweriOS-Info.plist */,
 				EFFCDBCC175FC8CE00C81A29 /* InfoPlist.strings */,
 				EFFCDBCF175FC8CE00C81A29 /* main.m */,
@@ -172,7 +172,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = APL;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = Apple;
 			};
 			buildConfigurationList = EFFCDBBB175FC8CD00C81A29 /* Build configuration list for PBXProject "AVCompositionDebugVieweriOS" */;
@@ -197,12 +197,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD65AC511D22453200C5C1A4 /* eer.mp4 in Resources */,
 				EFFCDBE0175FC8CE00C81A29 /* Default-Landscape~ipad.png in Resources */,
 				FD65AC191D1BCE0A00C5C1A4 /* qwe.mp4 in Resources */,
 				EFFCDBDE175FC8CE00C81A29 /* Default-Portrait@2x~ipad.png in Resources */,
 				EFFCDBD8175FC8CE00C81A29 /* Default@2x.png in Resources */,
-				EFFCDC12175FD40800C81A29 /* sample_clip1.m4v in Resources */,
-				EFFCDC14175FD42C00C81A29 /* sample_clip2.mov in Resources */,
+				FD65AC4E1D215B8600C5C1A4 /* abc.mp4 in Resources */,
 				EFFCDBE2175FC8CE00C81A29 /* Default-Landscape@2x~ipad.png in Resources */,
 				EFFCDBDA175FC8CE00C81A29 /* Default-568h@2x.png in Resources */,
 				EFFCDBE8175FC8CE00C81A29 /* Main_iPad.storyboard in Resources */,
@@ -268,6 +268,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -327,6 +328,7 @@
 				GCC_PREFIX_HEADER = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Prefix.pch";
 				INFOPLIST_FILE = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 2;
 				WRAPPER_EXTENSION = app;
@@ -340,6 +342,7 @@
 				GCC_PREFIX_HEADER = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Prefix.pch";
 				INFOPLIST_FILE = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 2;
 				WRAPPER_EXTENSION = app;

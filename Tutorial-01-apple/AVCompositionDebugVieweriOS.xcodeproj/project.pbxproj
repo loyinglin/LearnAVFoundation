@@ -26,9 +26,9 @@
 		EFFCDBEB175FC8CE00C81A29 /* APLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EFFCDBEA175FC8CE00C81A29 /* APLViewController.m */; };
 		EFFCDBF3175FCDE500C81A29 /* APLSimpleEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = EFFCDBF2175FCDE500C81A29 /* APLSimpleEditor.m */; };
 		EFFCDC10175FCEB200C81A29 /* APLCompositionDebugView.m in Sources */ = {isa = PBXBuildFile; fileRef = EFFCDC0F175FCEB200C81A29 /* APLCompositionDebugView.m */; };
-		FD65AC191D1BCE0A00C5C1A4 /* qwe.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FD65AC181D1BCE0A00C5C1A4 /* qwe.mp4 */; };
-		FD65AC4E1D215B8600C5C1A4 /* abc.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FD65AC4D1D215B8600C5C1A4 /* abc.mp4 */; };
-		FD65AC511D22453200C5C1A4 /* eer.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FD65AC501D22453200C5C1A4 /* eer.mp4 */; };
+		FDF82EA721116113003EDBD9 /* abc.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FDF82EA421116113003EDBD9 /* abc.mp4 */; };
+		FDF82EA821116113003EDBD9 /* eer.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FDF82EA521116113003EDBD9 /* eer.mp4 */; };
+		FDF82EA921116113003EDBD9 /* qwe.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FDF82EA621116113003EDBD9 /* qwe.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,9 +58,9 @@
 		EFFCDBF2175FCDE500C81A29 /* APLSimpleEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = APLSimpleEditor.m; sourceTree = "<group>"; };
 		EFFCDC0E175FCEB200C81A29 /* APLCompositionDebugView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APLCompositionDebugView.h; sourceTree = "<group>"; };
 		EFFCDC0F175FCEB200C81A29 /* APLCompositionDebugView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = APLCompositionDebugView.m; sourceTree = "<group>"; };
-		FD65AC181D1BCE0A00C5C1A4 /* qwe.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = qwe.mp4; sourceTree = "<group>"; };
-		FD65AC4D1D215B8600C5C1A4 /* abc.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.mp4; sourceTree = "<group>"; };
-		FD65AC501D22453200C5C1A4 /* eer.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = eer.mp4; sourceTree = "<group>"; };
+		FDF82EA421116113003EDBD9 /* abc.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.mp4; sourceTree = "<group>"; };
+		FDF82EA521116113003EDBD9 /* eer.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = eer.mp4; sourceTree = "<group>"; };
+		FDF82EA621116113003EDBD9 /* qwe.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = qwe.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +110,7 @@
 		EFFCDBC9175FC8CD00C81A29 /* AVCompositionDebugVieweriOS */ = {
 			isa = PBXGroup;
 			children = (
+				FDF82EA321116113003EDBD9 /* commonRes */,
 				EFFCDBD2175FC8CE00C81A29 /* APLAppDelegate.h */,
 				EFFCDBD3175FC8CE00C81A29 /* APLAppDelegate.m */,
 				EFFCDBE6175FC8CE00C81A29 /* Main_iPad.storyboard */,
@@ -127,9 +128,6 @@
 		EFFCDBCA175FC8CE00C81A29 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				FD65AC501D22453200C5C1A4 /* eer.mp4 */,
-				FD65AC4D1D215B8600C5C1A4 /* abc.mp4 */,
-				FD65AC181D1BCE0A00C5C1A4 /* qwe.mp4 */,
 				EFFCDBCB175FC8CE00C81A29 /* AVCompositionDebugVieweriOS-Info.plist */,
 				EFFCDBCC175FC8CE00C81A29 /* InfoPlist.strings */,
 				EFFCDBCF175FC8CE00C81A29 /* main.m */,
@@ -143,6 +141,17 @@
 				EFFCDBE1175FC8CE00C81A29 /* Default-Landscape@2x~ipad.png */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FDF82EA321116113003EDBD9 /* commonRes */ = {
+			isa = PBXGroup;
+			children = (
+				FDF82EA421116113003EDBD9 /* abc.mp4 */,
+				FDF82EA521116113003EDBD9 /* eer.mp4 */,
+				FDF82EA621116113003EDBD9 /* qwe.mp4 */,
+			);
+			name = commonRes;
+			path = ../../commonRes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -174,6 +183,11 @@
 				CLASSPREFIX = APL;
 				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = Apple;
+				TargetAttributes = {
+					EFFCDBBF175FC8CD00C81A29 = {
+						DevelopmentTeam = A478ENRUX2;
+					};
+				};
 			};
 			buildConfigurationList = EFFCDBBB175FC8CD00C81A29 /* Build configuration list for PBXProject "AVCompositionDebugVieweriOS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -197,17 +211,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD65AC511D22453200C5C1A4 /* eer.mp4 in Resources */,
 				EFFCDBE0175FC8CE00C81A29 /* Default-Landscape~ipad.png in Resources */,
-				FD65AC191D1BCE0A00C5C1A4 /* qwe.mp4 in Resources */,
+				FDF82EA921116113003EDBD9 /* qwe.mp4 in Resources */,
 				EFFCDBDE175FC8CE00C81A29 /* Default-Portrait@2x~ipad.png in Resources */,
 				EFFCDBD8175FC8CE00C81A29 /* Default@2x.png in Resources */,
-				FD65AC4E1D215B8600C5C1A4 /* abc.mp4 in Resources */,
 				EFFCDBE2175FC8CE00C81A29 /* Default-Landscape@2x~ipad.png in Resources */,
 				EFFCDBDA175FC8CE00C81A29 /* Default-568h@2x.png in Resources */,
 				EFFCDBE8175FC8CE00C81A29 /* Main_iPad.storyboard in Resources */,
+				FDF82EA821116113003EDBD9 /* eer.mp4 in Resources */,
 				EFFCDBDC175FC8CE00C81A29 /* Default-Portrait~ipad.png in Resources */,
 				EFFCDBCE175FC8CE00C81A29 /* InfoPlist.strings in Resources */,
+				FDF82EA721116113003EDBD9 /* abc.mp4 in Resources */,
 				EF830A921760155300CF1DC2 /* ReadMe.txt in Resources */,
 				EFFCDBD6175FC8CE00C81A29 /* Default.png in Resources */,
 			);
@@ -324,13 +338,14 @@
 		EFFCDBEF175FC8CE00C81A29 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEVELOPMENT_TEAM = A478ENRUX2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Prefix.pch";
 				INFOPLIST_FILE = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = 2;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -338,13 +353,14 @@
 		EFFCDBF0175FC8CE00C81A29 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEVELOPMENT_TEAM = A478ENRUX2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Prefix.pch";
 				INFOPLIST_FILE = "AVCompositionDebugVieweriOS/AVCompositionDebugVieweriOS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = 2;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
